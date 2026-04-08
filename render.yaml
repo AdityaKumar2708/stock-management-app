@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: stock-management-app
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /
+    autoDeployTrigger: commit
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: stock-management-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: stock-management-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: stock-management-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: stock-management-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: stock-management-db
+          property: password
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: APP_JWT_SECRET
+        sync: false
+
+databases:
+  - name: stock-management-db
+    plan: free
+    region: oregon
+    databaseName: stock_management_db
