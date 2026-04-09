@@ -9,4 +9,4 @@ RUN ./gradlew clean build
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "java -jar build/libs/*.jar"]
+CMD ["sh", "-c", "java -jar $(ls build/libs/*SNAPSHOT.jar | grep -v plain)"]
