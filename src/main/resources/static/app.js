@@ -265,6 +265,54 @@ function getLowStockProducts(products) {
   return products.filter(product => Number(product.quantity || 0) <= Number(product.minimumQuantity || 0));
 }
 
+function getReorderQuantity(product) {
+  const minimum = Number(product.minimumQuantity || 0);
+  const quantity = Number(product.quantity || 0);
+  return Math.max(minimum - quantity, 1);
+}
+
+async function syncLowStockReorders() {
+  requireUser();
+
+  const lowStockProducts = getLowStockProducts(state.products);
+  const lowStockIds = new Set(lowStockProducts.map(product => product.id));
+  const reorderSnap = await getDocs(userCollection('reorders'));
+  const existingReorders = reorderSnap.docs.map(item => ({ id: item.id, ...item.data() }));
+
+  const autoReorders = existingReorders.filter(item => item.source === 'auto' && item.productId);
+  const autoByProductId = new Map(autoReorders.map(item => [item.productId, item]));
+
+  for (const product of lowStockProducts) {
+    const payload = {
+      productId: product.id,
+      itemName: product.name,
+      imageUrl: product.imageUrl || null,
+      cost: Number(product.cost || 0),
+      quantity: getReorderQuantity(product),
+      source: 'auto',
+      updatedAt: new Date().toISOString()
+    };
+
+    const existing = autoByProductId.get(product.id);
+    if (existing) {
+      await updateDoc(userDoc('reorders', existing.id), payload);
+    } else {
+      await addDoc(userCollection('reorders'), {
+        ...payload,
+        createdAt: new Date().toISOString()
+      });
+    }
+  }
+
+  for (const item of autoReorders) {
+    if (!lowStockIds.has(item.productId)) {
+      await deleteDoc(userDoc('reorders', item.id));
+    }
+  }
+
+  await refreshReorders();
+}
+
 function renderWidgetList(el, rows) {
   el.innerHTML = '';
   if (!rows.length) {
@@ -1077,7 +1125,8 @@ async function saveReorder() {
     itemName: document.getElementById('reorder-item-name').value.trim(),
     imageUrl: document.getElementById('reorder-item-image').value.trim() || null,
     cost: Number(document.getElementById('reorder-item-cost').value || 0),
-    quantity: Number(document.getElementById('reorder-item-qty').value || 0)
+    quantity: Number(document.getElementById('reorder-item-qty').value || 0),
+    source: 'manual'
   };
 
   if (!payload.itemName) {
@@ -1343,6 +1392,7 @@ async function refreshProducts() {
   renderProducts();
   renderBillingItems();
   renderDashboard();
+  await syncLowStockReorders();
 }
 
 async function refreshReorders() {
