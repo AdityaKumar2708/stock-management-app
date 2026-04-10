@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mr Dukandar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="loadbar" class="loadbar hidden" role="status" aria-live="polite" aria-label="Loading workspace">
+    <div class="loadbar-track">
+      <div class="loadbar-fill"></div>
+    </div>
+    <div id="loadbar-text" class="loadbar-text">Loading...</div>
+  </div>
+
+  <div id="auth-view" class="auth-shell">
+    <div class="auth-card">
+      <h1>Mr Dukandar</h1>
+      <p>Firebase-ready stock and billing workspace</p>
+
+      <div class="tabs">
+        <button id="show-login" class="tab active" type="button">Login</button>
+        <button id="show-register" class="tab" type="button">Register</button>
+      </div>
+
+      <form id="login-form" class="form">
+        <input type="email" id="login-email" placeholder="Email" required />
+        <input type="password" id="login-password" placeholder="Password" required />
+        <button type="submit">Sign In</button>
+      </form>
+
+      <button id="forgot-password-btn" class="text-button" type="button">Forgot password?</button>
+
+      <form id="reset-form" class="form hidden">
+        <input type="email" id="reset-email" placeholder="Email" required />
+        <button type="submit">Send Reset Link</button>
+        <button id="back-to-login-btn" class="btn-secondary" type="button">Back to Login</button>
+      </form>
+      <div id="reset-hint" class="hint hidden">
+        Check your inbox, spam, and promotions folders after requesting a reset link.
+      </div>
+
+      <form id="register-form" class="form hidden">
+        <input type="text" id="register-name" placeholder="Full Name" required />
+        <input type="email" id="register-email" placeholder="Email" required />
+        <input type="password" id="register-password" placeholder="Password" required />
+        <button type="submit">Create Account</button>
+      </form>
+
+      <div id="auth-message" class="message"></div>
+    </div>
+  </div>
+
+  <div id="app-view" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="brand">StockFlow</div>
+      <nav>
+        <button class="nav-btn active" data-view="dashboard" type="button">Dashboard</button>
+        <button class="nav-btn" data-view="stocks" type="button">Stocks</button>
+        <button class="nav-btn" data-view="reorders" type="button">Reorder</button>
+        <button class="nav-btn" data-view="credits" type="button">Customer Credit</button>
+        <button class="nav-btn" data-view="billing" type="button">Billing</button>
+        <button class="nav-btn" data-view="notes" type="button">Notes</button>
+        <button class="nav-btn" data-view="gallary" type="button">Gallary</button>
+        <button class="nav-btn" data-view="settings" type="button">Settings</button>
+      </nav>
+      <button id="logout-btn" class="logout-btn" type="button">Logout</button>
+    </aside>
+
+    <main class="main-content">
+      <section id="dashboard" class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 id="dashboard-shop-title">Business Dashboard</h2>
+            <p id="dashboard-shop-subtitle" class="subtitle">Track sales, stock health, and billing performance in one place.</p>
+          </div>
+          <div class="badge">Live Overview</div>
+        </div>
+
+        <div id="summary-cards" class="cards dashboard-cards"></div>
+        <div class="dashboard-grid">
+          <article class="widget">
+            <div class="widget-title">Recent Invoices</div>
+            <div id="dashboard-recent-invoices" class="widget-list"></div>
+          </article>
+          <article class="widget">
+            <div class="widget-title">Low Stock Alerts</div>
+            <div id="dashboard-low-stock" class="widget-list"></div>
+          </article>
+          <article class="widget">
+            <div class="widget-title">Top Customers by Billing</div>
+            <div id="dashboard-top-customers" class="widget-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="stocks" class="panel hidden">
+        <h2>Stocks</h2>
+        <form id="product-form" class="inline-form stocks-form">
+          <input id="product-name" placeholder="Item Name" required />
+          <input id="product-category" placeholder="Category" required />
+          <input id="product-image" placeholder="Item Image URL" />
+          <input id="product-qty" type="number" min="0" placeholder="Quantity" required />
+          <input id="product-min-qty" type="number" min="0" placeholder="Minimum Quantity" required />
+          <input id="product-cost" type="number" min="0" step="0.01" placeholder="Cost" required />
+          <input id="product-price" type="number" min="0" step="0.01" placeholder="Price" required />
+          <button id="product-submit-btn" type="submit">Add Item</button>
+        </form>
+        <div class="stock-toolbar">
+          <input id="stock-search" type="search" placeholder="Search by item name or category..." />
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>S No.</th>
+              <th>Image</th>
+              <th>Item Name</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Min Qty</th>
+              <th>Cost</th>
+              <th>Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="product-table"></tbody>
+        </table>
+      </section>
+
+      <section id="credits" class="panel hidden">
+        <h2>Customer Credit</h2>
+        <div class="credit-toolbar">
+          <input id="credit-search" type="search" placeholder="Search customer..." />
+          <button id="add-credit-btn" type="button">Add Customer</button>
+        </div>
+        <div id="credit-list" class="credit-grid"></div>
+      </section>
+
+      <section id="reorders" class="panel hidden">
+        <h2>Reorder</h2>
+        <div class="reorder-toolbar">
+          <input id="reorder-search" type="search" placeholder="Search reorder items..." />
+          <button id="add-reorder-btn" type="button">Add Item</button>
+        </div>
+        <form id="reorder-form" class="inline-form hidden">
+          <input id="reorder-item-name" placeholder="Item Name" required />
+          <input id="reorder-item-image" placeholder="Image URL (Optional)" />
+          <input id="reorder-item-cost" type="number" min="0" step="0.01" placeholder="Cost" required />
+          <input id="reorder-item-qty" type="number" min="0" placeholder="Quantity" required />
+          <button id="reorder-submit-btn" type="submit">Save Reorder Item</button>
+        </form>
+        <table>
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Image</th>
+              <th>Cost</th>
+              <th>Quantity</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reorder-table"></tbody>
+        </table>
+      </section>
+
+      <section id="billing" class="panel hidden">
+        <h2>Billing</h2>
+        <div class="search-bar">
+          <input type="text" id="billing-search" placeholder="Search item name..." />
+        </div>
+        <form id="invoice-form" class="inline-form">
+          <select id="bill-seller" required></select>
+          <input id="bill-customer-name" placeholder="Customer Name (Optional)" />
+          <input id="bill-customer-contact" placeholder="Contact Number (Optional)" />
+        </form>
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Available Stock</th>
+              <th>Price</th>
+              <th>Bill Qty</th>
+              <th>Line Total</th>
+            </tr>
+          </thead>
+          <tbody id="billing-item-table"></tbody>
+        </table>
+        <div class="billing-actions">
+          <div id="bill-total-preview" class="bill-total">Total: INR 0.00</div>
+          <div class="row-actions">
+            <button id="generate-pdf-btn" type="button">Generate Bill PDF</button>
+            <button id="send-whatsapp-btn" type="button" class="btn-secondary">Send On WhatsApp</button>
+          </div>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="invoice-search" placeholder="Search invoices..." />
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Seller</th>
+              <th>Customer</th>
+              <th>Total</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="invoice-table"></tbody>
+        </table>
+      </section>
+
+      <section id="settings" class="panel hidden">
+        <h2>Settings</h2>
+        <div class="settings-grid">
+          <article class="widget">
+            <div class="widget-title">Shop Profile</div>
+            <form id="shop-settings-form" class="form">
+              <input id="shop-name" placeholder="Shop Name" required />
+              <textarea id="shop-description" rows="4" placeholder="Shop Description"></textarea>
+              <button type="submit">Save Shop Details</button>
+            </form>
+          </article>
+
+          <article class="widget">
+            <div class="widget-title">Appearance</div>
+            <label class="switch-row">
+              <span>Dark Mode</span>
+              <input id="dark-mode-toggle" type="checkbox" />
+            </label>
+            <div class="widget-empty">Toggle dark mode for the entire app UI.</div>
+          </article>
+
+          <article class="widget">
+            <div class="widget-title">Multi Account</div>
+            <label class="switch-row">
+              <span>Enable Multiple Accounts</span>
+              <input id="multi-account-toggle" type="checkbox" />
+            </label>
+            <form id="linked-account-form" class="form">
+              <input id="linked-account-email" type="email" placeholder="Add another account email" />
+              <button type="submit">Add Account</button>
+            </form>
+            <div id="linked-account-list" class="widget-list"></div>
+          </article>
+
+          <article class="widget">
+            <div class="widget-title">Sellers</div>
+            <form id="seller-form" class="form">
+              <input id="seller-name" placeholder="Seller name" required />
+              <button type="submit">Add Seller</button>
+            </form>
+            <div id="seller-list" class="widget-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="notes" class="panel hidden">
+        <h2>Notes</h2>
+        <div class="notes-toolbar">
+          <input id="notes-search" type="search" placeholder="Search notes..." />
+        </div>
+        <form id="note-form" class="form">
+          <input id="note-title" placeholder="Note Title" required />
+          <textarea id="note-content" rows="5" placeholder="Write your note..." required></textarea>
+          <button id="note-submit-btn" type="submit">Add Note</button>
+        </form>
+        <div id="notes-list" class="credit-grid"></div>
+      </section>
+
+      <section id="gallary" class="panel hidden">
+        <h2>Gallary</h2>
+        <div class="gallery-toolbar">
+          <input id="gallary-search" type="search" placeholder="Search images by title..." />
+          <button id="add-gallary-btn" type="button">Add</button>
+        </div>
+        <form id="gallary-form" class="form hidden">
+          <input id="gallary-title" placeholder="Image Title" required />
+          <input id="gallary-image" type="file" accept="image/*" />
+          <img id="gallary-preview" class="gallery-preview hidden" alt="Preview" />
+          <button id="gallary-submit-btn" type="submit">Save Image</button>
+        </form>
+        <div id="gallary-list" class="credit-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./firebase-config.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
